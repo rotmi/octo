@@ -12,7 +12,9 @@ import jax
 import optax
 import tensorflow as tf
 import tqdm
-import wandb
+#import wandb
+import sys
+import subprocess
 
 from octo.data.dataset import make_single_dataset
 from octo.model.components.action_heads import L1ActionHead
@@ -30,18 +32,18 @@ from octo.utils.train_utils import (
 FLAGS = flags.FLAGS
 
 flags.DEFINE_string(
-    "pretrained_path", None, "Path to pre-trained Octo checkpoint directory."
+    "pretrained_path", 'hf://rail-berkeley/octo-small-1.5', "Path to pre-trained Octo checkpoint directory."
 )
-flags.DEFINE_string("data_dir", None, "Path to finetuning dataset, in RLDS format.")
-flags.DEFINE_string("save_dir", None, "Directory for saving finetuning checkpoints.")
-flags.DEFINE_integer("batch_size", 128, "Batch size for finetuning.")
+flags.DEFINE_string("data_dir", '/opt/ml/input/data/train', "Path to finetuning dataset, in RLDS format.")
+flags.DEFINE_string("save_dir", '/opt/ml/checkpoints', "Directory for saving finetuning checkpoints.")
+flags.DEFINE_integer("batch_size", 112, "Batch size for finetuning.")
+flags.DEFINE_string("model_dir", None, "Path to store model in S3.")
 
 flags.DEFINE_bool(
     "freeze_transformer",
     False,
     "Whether pre-trained transformer weights should be frozen.",
 )
-
 
 def main(_):
     assert (
@@ -53,7 +55,7 @@ def main(_):
     tf.config.set_visible_devices([], "GPU")
 
     # setup wandb for logging
-    wandb.init(name="finetune_aloha", project="octo")
+    #wandb.init(name="finetune_aloha", project="octo")
 
     # load pre-trained model
     logging.info("Loading pre-trained model...")
@@ -84,7 +86,7 @@ def main(_):
     train_data_iter = (
         dataset.repeat()
         .unbatch()
-        .shuffle(10000)  # can reduce this if RAM consumption too high
+        .shuffle(10)  # can reduce this if RAM consumption too high
         .batch(FLAGS.batch_size)
         .iterator()
     )
@@ -187,10 +189,10 @@ def main(_):
         train_state, update_info = train_step(train_state, batch)
         if (i + 1) % 100 == 0:
             update_info = jax.device_get(update_info)
-            wandb.log(
-                flax.traverse_util.flatten_dict({"training": update_info}, sep="/"),
-                step=i,
-            )
+            # wandb.log(
+            #     flax.traverse_util.flatten_dict({"training": update_info}, sep="/"),
+            #     step=i,
+            # )
         if (i + 1) % 1000 == 0:
             # save checkpoint
             train_state.model.save_pretrained(step=i, checkpoint_path=FLAGS.save_dir)
