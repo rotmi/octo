@@ -1,6 +1,6 @@
 # Finetune Octo on Amazon SageMaker
 
-The Jupyter notebook octo-sagemaker.ipynb provides you a simple example how to finetune the Octo robotics model on Amazon SageMaker using a slightly adapted finetuning script that Octo provides. For additional details on Octo have a look into the upstream [Octo repo](https://github.com/octo-models/octo)
+The Jupyter notebook [octo-sagemaker.ipynb](https://github.com/rotmi/octo/blob/main/octo-sagemaker.ipynb) provides you a simple example how to finetune the Octo robotics model on Amazon SageMaker using a slightly adapted finetuning script that Octo provides. For additional details on Octo have a look into the upstream [Octo repo](https://github.com/octo-models/octo)
 
 The notebook has been tested successfully on an Amazon SageMaker Studio ml.t3.medium instance running an Amazon Sagemaker Distribution 1.9 image.
 
